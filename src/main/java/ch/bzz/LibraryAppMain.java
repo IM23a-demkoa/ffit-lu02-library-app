@@ -2,13 +2,19 @@ package ch.bzz;
 
 import java.util.Scanner;
 import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 
 public class LibraryAppMain {
-
     public static void main(String[] args) {
-        System.out.println("HelloWorld");
+        Book one = new Book(1,"978-3-8362-9544-4","Java ist auch eine Insel","Christian Ullenboom",2023);
+        Book two = new Book(2,"978-3-658-43573-8","Grundkurs Java","Dietmar Abts", 2024);
+        List<Book> booklist = new ArrayList<>();
+        booklist.add(one);
+        booklist.add(two);
+
         String[] commands = {"help", "quit", "cool", "bye", "say"};
-        Scanner scanner = new Scanner(System.in); // nur einmal erstellen
+        Scanner scanner = new Scanner(System.in);
 
         while (true) {
             String command = scanner.nextLine();
@@ -17,6 +23,8 @@ public class LibraryAppMain {
                 break;
             } else if (command.equals("help")) {
                 System.out.println(Arrays.toString(commands));
+            } else if (command.equals("listBooks")) {
+                booklist.forEach(System.out::println);
             } else {
                 System.out.println("Eingabe nicht als Befehl erkannt" + command);
                 System.out.println("mochtest du hinzufugen Yes/No");
