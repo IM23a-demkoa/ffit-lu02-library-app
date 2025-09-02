@@ -1,7 +1,6 @@
 package ch.bzz;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.sql.*;
 import java.util.*;
 
@@ -18,10 +17,9 @@ public class LibraryAppMain {
         return props;
     }
 
-    // JDBC-Methode in separater Klasse oder inner class
     public static List<Book> fetchBooks() {
         List<Book> books = new ArrayList<>();
-        Properties props = loadProperties();   // ⬅️ hier die Properties laden
+        Properties props = loadProperties();
 
         String url = props.getProperty("DB_URL");
         String user = props.getProperty("DB_USER");
@@ -51,13 +49,65 @@ public class LibraryAppMain {
         return books;
     }
 
+    // Neue Methode zum Einlesen von TSV-Dateien
+    public static List<Book> importBooksFromTSV(String filePath) {
+        List<Book> books = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(filePath), "UTF-8"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split("\t");
+                if (parts.length != 5) continue;
+                Book book = new Book(
+                        Integer.parseInt(parts[0]),
+                        parts[1],
+                        parts[2],
+                        parts[3],
+                        Integer.parseInt(parts[4])
+                );
+                books.add(book);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return books;
+    }
+
+    // Speichern der Bücher in der Datenbank (Upsert)
+    public static void saveBooksToDatabase(List<Book> books) {
+        Properties props = loadProperties();
+        String url = props.getProperty("DB_URL");
+        String user = props.getProperty("DB_USER");
+        String password = props.getProperty("DB_PASSWORD");
+
+        String query = "INSERT INTO books (id, isbn, title, author, publication_year) VALUES (?, ?, ?, ?, ?) " +
+                "ON DUPLICATE KEY UPDATE isbn = VALUES(isbn), title = VALUES(title), author = VALUES(author), publication_year = VALUES(publication_year)";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            for (Book book : books) {
+                pstmt.setInt(1, book.id);
+                pstmt.setString(2, book.isbn);
+                pstmt.setString(3, book.title);
+                pstmt.setString(4, book.author);
+                pstmt.setInt(5, book.year);
+                pstmt.executeUpdate();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         List<Book> books = fetchBooks();
-        String[] commands = {"help", "quit", "cool", "bye", "say"};
+        String[] commands = {"help", "quit", "cool", "bye", "say", "listBooks", "importBooks"};
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            String command = scanner.nextLine();
+            String input = scanner.nextLine();
+            String[] parts = input.split(" ", 2); // Befehl + Argument
+            String command = parts[0];
 
             if (command.equals("quit")) {
                 break;
@@ -65,6 +115,12 @@ public class LibraryAppMain {
                 System.out.println(Arrays.toString(commands));
             } else if (command.equals("listBooks")) {
                 books.forEach(System.out::println);
+            } else if (command.equals("importBooks") && parts.length == 2) {
+                String filePath = parts[1];
+                List<Book> importedBooks = importBooksFromTSV(filePath);
+                saveBooksToDatabase(importedBooks);
+                System.out.println("Import abgeschlossen: " + importedBooks.size() + " Bücher importiert.");
+                books = fetchBooks();
             } else {
                 System.out.println("Eingabe nicht als Befehl erkannt: " + command);
                 System.out.println("mochtest du hinzufugen Yes/No");
