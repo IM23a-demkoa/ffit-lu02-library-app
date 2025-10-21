@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence xmlns="https://jakarta.ee/xml/ns/persistence" version="3.0">
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
     <persistence-unit name="localPU">
         <class>ch.bzz.model.Book</class>
         <class>ch.bzz.model.User</class>
@@ -9,6 +12,9 @@
             <property name="hibernate.hikari.maximumPoolSize" value="10"/>
             <property name="hibernate.show_sql" value="false"/>
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/localdb"/>
+            <property name="jakarta.persistence.jdbc.user" value="localuser"/>
+            <property name="jakarta.persistence.jdbc.password" value="secret"/>
         </properties>
     </persistence-unit>
 </persistence>

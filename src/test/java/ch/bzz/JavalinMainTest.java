@@ -1,7 +1,6 @@
 package ch.bzz;
 
 import ch.bzz.db.BookPersistor;
-import ch.bzz.model.Book;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
@@ -30,7 +29,7 @@ public class JavalinMainTest {
     void testGetBooksWithLimit() throws Exception {
         // Arrange
         int limit = 3;
-        List<Book> expectedBooks = bookPersistor.getAll(limit);
+        List<BookPersistor> expectedBooks = bookPersistor.getAll(limit);
 
         // Act
         URI uri = new URI("http://localhost:" + PORT + "/books?limit=" + limit);
@@ -51,7 +50,7 @@ public class JavalinMainTest {
         }
         String response = responseBuilder.toString();
 
-        List<Book> actualBooks = mapper.readValue(response, new TypeReference<List<Book>>() {});
+        List<BookPersistor> actualBooks = mapper.readValue(response, new TypeReference<List<BookPersistor>>() {});
 
         // Assert
         assertEquals(limit, actualBooks.size(), "The number of returned books is incorrect");

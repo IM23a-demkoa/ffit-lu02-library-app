@@ -1,8 +1,7 @@
 package ch.bzz;
 
-import ch.bzz.model.Book;
+import ch.bzz.db.BookPersistor;
 import ch.bzz.model.User;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import org.junit.jupiter.api.AfterAll;
@@ -29,8 +28,8 @@ class LibraryAppMainTest {
 
         try (var em = emf.createEntityManager()) {
             em.getTransaction().begin();
-            em.merge(new Book(1, "978-0134685991", "Effective Java", "Joshua Bloch", 2018));
-            em.merge(new Book(2, "978-0596009205", "Head First Java", "Kathy Sierra, Bert Bates", 2005));
+            em.merge(new BookPersistor(1, "978-0134685991", "Effective Java", "Joshua Bloch", 2018));
+            em.merge(new BookPersistor(2, "978-0596009205", "Head First Java", "Kathy Sierra, Bert Bates", 2005));
             em.getTransaction().commit();
         }
     }
